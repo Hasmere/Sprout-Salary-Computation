@@ -22,6 +22,9 @@ export class EmployeeCalculate extends Component {
   }
 
   render() {
+    const netIncome = this.state.netIncome === 0
+    ? '0.00'
+    : parseFloat(this.state.netIncome.toFixed(2)).toLocaleString();
 
     let contents = this.state.loading
     ? <p><em>Loading...</em></p>
@@ -76,7 +79,7 @@ export class EmployeeCalculate extends Component {
 
 <div className="form-row">
 <div className='form-group col-md-12'>
-  <label>Net Income: <b>{this.state.netIncome.toFixed(2)}</b></label>
+  <label>Net Income: <b>{netIncome}</b></label>
 </div>
 </div>
 
