@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Sprout.Exam.Business.DataTransferObjects;
 using Sprout.Exam.Common.Enums;
-using Sprout.Exam.Business.Calculators;
 using Sprout.Exam.Business.Factories;
+using Sprout.Exam.WebApp.Data;
 
 namespace Sprout.Exam.WebApp.Controllers
 {
@@ -17,6 +18,12 @@ namespace Sprout.Exam.WebApp.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
+        private ApplicationDbContext _context; // Inject ApplicationDbContext
+
+        public EmployeesController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
         /// <summary>
         /// Refactor this method to go through proper layers and fetch from the DB.
@@ -25,8 +32,10 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList);
-            return Ok(result);
+            var employees = await _context.Employee
+                .Where(e => e.IsDeleted == false)
+                .ToListAsync();
+            return Ok(employees);
         }
 
         /// <summary>
