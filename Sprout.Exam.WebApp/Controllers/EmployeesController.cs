@@ -34,6 +34,14 @@ namespace Sprout.Exam.WebApp.Controllers
         {
             var employees = await _context.Employee
                 .Where(e => e.IsDeleted == false)
+                .Select(e => new EmployeeDto
+                {
+                    Id = e.Id,
+                    FullName = e.FullName,
+                    Birthdate = e.Birthdate.ToString("yyyy-MM-dd"), // Format the date
+                    Tin = e.Tin,
+                    TypeId = e.EmployeeTypeId
+                })
                 .ToListAsync();
             return Ok(employees);
         }
