@@ -76,7 +76,7 @@ export class EmployeeCalculate extends Component {
 
 <div className="form-row">
 <div className='form-group col-md-12'>
-  <label>Net Income: <b>{this.state.netIncome}</b></label>
+  <label>Net Income: <b>{this.state.netIncome.toFixed(2)}</b></label>
 </div>
 </div>
 
@@ -103,7 +103,7 @@ export class EmployeeCalculate extends Component {
         headers: !token ? {} : { 'Authorization': `Bearer ${token}`,'Content-Type': 'application/json' },
         body: JSON.stringify({id: this.state.id,absentDays: this.state.absentDays,workedDays: this.state.workedDays})
     };
-    const response = await fetch('api/employees/' + this.state.id + '/calculate',requestOptions);
+    const response = await fetch('api/employees/' + this.state.id + '/calculate/' + this.state.absentDays + '/' + this.state.workedDays, requestOptions);
     const data = await response.json();
     this.setState({ loadingCalculate: false,netIncome: data });
   }
