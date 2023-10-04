@@ -32,7 +32,7 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var employees = await _context.Employee
+            var result = await _context.Employee
                 .Where(e => e.IsDeleted == false)
                 .Select(e => new EmployeeDto
                 {
@@ -43,7 +43,8 @@ namespace Sprout.Exam.WebApp.Controllers
                     TypeId = e.EmployeeTypeId
                 })
                 .ToListAsync();
-            return Ok(employees);
+
+            return Ok(result);
         }
 
         /// <summary>
@@ -121,7 +122,17 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpPost("{id}/calculate/{absentDays}/{workedDays}")]
         public async Task<IActionResult> Calculate(int id,decimal absentDays,decimal workedDays)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
+            var result = await _context.Employee
+                .Where(e => e.Id == id && e.IsDeleted == false)
+                .Select(e => new EmployeeDto
+                {
+                    Id = e.Id,
+                    FullName = e.FullName,
+                    Birthdate = e.Birthdate.ToString("yyyy-MM-dd"),
+                    Tin = e.Tin,
+                    TypeId = e.EmployeeTypeId
+                })
+                .FirstOrDefaultAsync();
             
             if (result == null) return NotFound();
             
