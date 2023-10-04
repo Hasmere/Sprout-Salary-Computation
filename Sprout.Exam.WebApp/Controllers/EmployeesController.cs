@@ -10,6 +10,7 @@ using Sprout.Exam.Business.DataTransferObjects;
 using Sprout.Exam.Common.Enums;
 using Sprout.Exam.Business.Factories;
 using Sprout.Exam.WebApp.Data;
+using Sprout.Exam.WebApp.Models;
 
 namespace Sprout.Exam.WebApp.Controllers
 {
@@ -105,18 +106,26 @@ namespace Sprout.Exam.WebApp.Controllers
         public async Task<IActionResult> Post(CreateEmployeeDto input)
         {
 
-           var id = await Task.FromResult(StaticEmployees.ResultList.Max(m => m.Id) + 1);
-
-            StaticEmployees.ResultList.Add(new EmployeeDto
+            var newEmployee = new Employee
             {
-                Birthdate = input.Birthdate.ToString("yyyy-MM-dd"),
+                Birthdate = input.Birthdate,
                 FullName = input.FullName,
-                Id = id,
                 Tin = input.Tin,
-                TypeId = input.TypeId
-            });
+                EmployeeTypeId = input.TypeId,
+                IsDeleted = false
+            };
 
-            return Created($"/api/employees/{id}", id);
+            _context.Employee.Add(newEmployee);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Created($"/api/employees/{newEmployee.Id}", newEmployee.Id);
+            }
+            catch (Exception)
+            {
+                return BadRequest("Failed to create employee.");
+            }
         }
 
 
@@ -127,10 +136,23 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
+            var result = await _context.Employee
+                .Where(e => e.Id == id && e.IsDeleted == false)
+                .FirstOrDefaultAsync();
+            
             if (result == null) return NotFound();
-            StaticEmployees.ResultList.RemoveAll(m => m.Id == id);
-            return Ok(id);
+
+            result.IsDeleted = true;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(id);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BadRequest("Concurrency exception occurred.");
+            }
         }
 
 
