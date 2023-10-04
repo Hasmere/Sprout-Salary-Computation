@@ -21,10 +21,16 @@ export class EmployeeCalculate extends Component {
       this.calculateSalary();
   }
 
+  formatNetIncome(netIncome) {
+    netIncome = parseFloat(netIncome);
+    const formattedIncome = netIncome.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return formattedIncome
+  }
+
   render() {
     const netIncome = this.state.netIncome === 0
     ? '0.00'
-    : parseFloat(this.state.netIncome.toFixed(2)).toLocaleString();
+    : this.formatNetIncome(this.state.netIncome)
 
     let contents = this.state.loading
     ? <p><em>Loading...</em></p>
