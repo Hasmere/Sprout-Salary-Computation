@@ -60,7 +60,7 @@ namespace Sprout.Exam.WebApp.Controllers
             {
                 Id = e.Id,
                 FullName = e.FullName,
-                Birthdate = e.Birthdate.ToString("yyyy-MM-dd"), // Format the date
+                Birthdate = e.Birthdate.ToString("yyyy-MM-dd"),
                 Tin = e.Tin,
                 TypeId = e.EmployeeTypeId
             })
@@ -76,13 +76,25 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(EditEmployeeDto input)
         {
-            var item = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == input.Id));
+            var item = await _context.Employee
+                .Where(e => e.Id == input.Id && e.IsDeleted == false)
+                .FirstOrDefaultAsync();
+
             if (item == null) return NotFound();
             item.FullName = input.FullName;
             item.Tin = input.Tin;
-            item.Birthdate = input.Birthdate.ToString("yyyy-MM-dd");
-            item.TypeId = input.TypeId;
-            return Ok(item);
+            item.Birthdate = input.Birthdate;
+            item.EmployeeTypeId = input.TypeId;
+
+            try
+            {
+                await _context.SaveChangesAsync(); 
+                return Ok(item);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BadRequest("Concurrency exception occurred.");
+            }
         }
 
         /// <summary>
