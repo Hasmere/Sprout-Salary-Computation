@@ -54,7 +54,18 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
+            var result = await _context.Employee
+            .Where(e => e.Id == id && e.IsDeleted == false)
+            .Select(e => new EmployeeDto
+            {
+                Id = e.Id,
+                FullName = e.FullName,
+                Birthdate = e.Birthdate.ToString("yyyy-MM-dd"), // Format the date
+                Tin = e.Tin,
+                TypeId = e.EmployeeTypeId
+            })
+            .FirstOrDefaultAsync();
+            
             return Ok(result);
         }
 
